@@ -43,3 +43,27 @@ EVM reporting begins once the cost baseline is committed in Phase 1.
 - Terraform practice build.
 
 ---
+
+## Week of 2026-10-29
+
+**Phase:** 3 — Wave 0 landing zone
+
+**Progress**
+- AWS access configured through IAM Identity Center. No long-lived access keys.
+- Terraform remote state in S3, versioning enabled, public access blocked.
+- Wave 0 landing zone applied: 27 resources. All free tier, no cost incurred.
+- Environment destroyed and rebuilt from code with no manual steps.
+  Charter objective O-2 verified.
+
+**Decisions**
+- Identity Center single-Region instance chosen over multi-Region to avoid
+  customer-managed KMS key charges. No functional loss for a single-region
+  pathfinder.
+
+**Blockers**
+- Pre-registration estimates E-1 to E-10 unfilled. Must be committed before
+  replication begins.
+
+**Next**
+- MGN initialisation and replication template.
+- Source environment build on the Windows host.
