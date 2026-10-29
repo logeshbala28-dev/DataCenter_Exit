@@ -3,13 +3,14 @@
 *.tfstate
 *.tfstate.*
 *.tfvars
+!*.tfvars.example
+backend.hcl
+*.tfplan
 crash.log
 override.tf
 override.tf.json
-.terraformrc
-terraform.rc
 
-# Credentials — never commit
+# Credentials - never commit
 *.pem
 *.key
 credentials
@@ -20,7 +21,6 @@ account-emails.txt
 __pycache__/
 *.pyc
 .venv/
-venv/
 
 # OS
 .DS_Store

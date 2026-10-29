@@ -1,0 +1,14 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+#
+# Find your public IP:  curl -s https://checkip.amazonaws.com
+# Then append /32.
+
+source_public_ip = "203.0.113.45/32"
+admin_ip         = "203.0.113.45/32"
+
+# Optional overrides
+# region      = "us-east-1"
+# aws_profile = "terraform-lab"
+# env         = "pathfinder"
+# vpc_cidr    = "10.20.0.0/16"
+# db_port     = 3306
