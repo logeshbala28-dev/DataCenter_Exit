@@ -1,0 +1,34 @@
+data.aws_availability_zones.available: Reading...
+aws_vpc.main: Refreshing state... [id=vpc-03a9b6b2a6d9afeb1]
+data.aws_availability_zones.available: Read complete after 1s [id=us-east-1]
+aws_route_table.private: Refreshing state... [id=rtb-0a21e6d030b7a7f06]
+aws_security_group.mgn_staging: Refreshing state... [id=sg-02e141ab520a4e12d]
+aws_security_group.app: Refreshing state... [id=sg-09cec7994b259cc3a]
+aws_default_security_group.locked: Refreshing state... [id=sg-0128f61ede7ceef72]
+aws_internet_gateway.main: Refreshing state... [id=igw-0cbcbe938a7c5ed3d]
+aws_subnet.public["us-east-1b"]: Refreshing state... [id=subnet-0c61cac8742310ad2]
+aws_security_group.dependency: Refreshing state... [id=sg-04ddfaa3eb160b50d]
+aws_subnet.private["us-east-1a"]: Refreshing state... [id=subnet-0f8e6c83c551d705d]
+aws_subnet.public["us-east-1a"]: Refreshing state... [id=subnet-00cc79f2e48b9b0b8]
+aws_subnet.private["us-east-1b"]: Refreshing state... [id=subnet-0f79869e3a3b4ef1d]
+aws_security_group.db: Refreshing state... [id=sg-021169865f79e1bae]
+aws_route_table.public: Refreshing state... [id=rtb-0143c600fba245347]
+aws_vpc_security_group_egress_rule.db_all_out: Refreshing state... [id=sgr-08b3219c7db9e54e5]
+aws_vpc_security_group_egress_rule.dep_all_out: Refreshing state... [id=sgr-022a1cfbc14e7d40c]
+aws_vpc_endpoint.s3: Refreshing state... [id=vpce-01ff654b1ac6b67d0]
+aws_vpc_security_group_ingress_rule.mgn_replication: Refreshing state... [id=sgr-099747cb2751fb6ec]
+aws_vpc_security_group_egress_rule.mgn_all_out: Refreshing state... [id=sgr-0a62089398390b43c]
+aws_vpc_security_group_ingress_rule.app_http: Refreshing state... [id=sgr-0d723806e86b73a65]
+aws_vpc_security_group_ingress_rule.app_ssh: Refreshing state... [id=sgr-08dc09ffa16cde067]
+aws_vpc_security_group_ingress_rule.dep_from_app: Refreshing state... [id=sgr-0757895b559869e33]
+aws_vpc_security_group_ingress_rule.db_from_app: Refreshing state... [id=sgr-07f18c279404c53c7]
+aws_vpc_security_group_egress_rule.app_all_out: Refreshing state... [id=sgr-04c31a9b59623ea4f]
+aws_route_table_association.public["us-east-1b"]: Refreshing state... [id=rtbassoc-03adf5e780e07e88e]
+aws_route_table_association.public["us-east-1a"]: Refreshing state... [id=rtbassoc-0f6f8bb8e61e65221]
+aws_route_table_association.private["us-east-1a"]: Refreshing state... [id=rtbassoc-06cf5601de750ff1f]
+aws_route_table_association.private["us-east-1b"]: Refreshing state... [id=rtbassoc-0e4ce20019be99496]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.

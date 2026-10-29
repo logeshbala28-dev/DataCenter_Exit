@@ -1,0 +1,25 @@
+app_sg_id = "sg-09cec7994b259cc3a"
+availability_zones = tolist([
+  "us-east-1a",
+  "us-east-1b",
+])
+db_sg_id = "sg-021169865f79e1bae"
+dependency_sg_id = "sg-04ddfaa3eb160b50d"
+mgn_staging_sg_id = "sg-02e141ab520a4e12d"
+mgn_staging_subnet_id = "subnet-00cc79f2e48b9b0b8"
+private_subnet_ids = [
+  "subnet-0f8e6c83c551d705d",
+  "subnet-0f79869e3a3b4ef1d",
+]
+public_subnet_ids = [
+  "subnet-00cc79f2e48b9b0b8",
+  "subnet-0c61cac8742310ad2",
+]
+vpc_cidr = "10.20.0.0/16"
+vpc_id = "vpc-03a9b6b2a6d9afeb1"
+
+Captured: Thu Oct 29 13:28:47 CDT 2026
+Account: 824892928812
+Region: us-east-1
+Note: environment was destroyed (27 resources) and rebuilt from code with no
+manual steps. Charter objective O-2 verified.
