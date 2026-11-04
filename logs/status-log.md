@@ -67,3 +67,38 @@ EVM reporting begins once the cost baseline is committed in Phase 1.
 **Next**
 - MGN initialisation and replication template.
 - Source environment build on the Windows host.
+
+---
+
+## Week of 2026-11-04
+
+**Phase:** 4 — Wave 1 pathfinder, source environment
+
+**Progress**
+- First source build discarded. It ran Ubuntu 26.10, which AWS MGN does not support.
+  Rebuilt on Ubuntu Server 24.04.3 LTS, kernel 6.8.0-147, held against updates.
+- Three VMs built and loaded: db01 (MySQL, 200000 / 400000 / 300000 rows), lic01
+  (licence service), app01 (nginx and Flask app). Fixed addresses through DHCP
+  reservations.
+- Dependency test repeated: app fails with the licence service stopped, recovers when
+  restored.
+- E-2 measured: 26,343,444,480 bytes used across the three VMs.
+- Pre-registration E-1 to E-10 filled and committed (39d44b4) before any replication.
+  E-4 to E-8 drafted with AI assistance and adopted by the author. E-9 and E-10 taken
+  from the committed WBS.
+- Snapshots `clean-os-24.04.3` and `source-ready` taken on all three VMs.
+
+**Decisions**
+- E-3 kept at the value committed on 2026-10-29 (1.5 hours). The recomputed figure from
+  measured volume (1.57 hours) is recorded alongside it, not substituted.
+- DHCP reservations used instead of static addresses in the guests, so the replicated
+  instances get a normal network at cutover.
+
+**Blockers**
+- None.
+
+**Next**
+- Confirm the commit timestamp on GitHub and add evidence to the repository.
+- Rebuild the landing zone, initialise MGN, install the agent on all three VMs.
+- Start replication and record the start time.
+
