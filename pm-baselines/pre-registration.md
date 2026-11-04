@@ -1,6 +1,7 @@
 # Pre-registration of Predictions and Estimates
 
 **Written:** 2026-10-29
+**Revised before execution:** 2026-11-04 (E-1 to E-3 filled from measured values; see revision note at the end)
 **Author:** Logesh Balakrishnan
 **Status:** Committed BEFORE any pathfinder execution
 
@@ -34,22 +35,53 @@ stated before execution with the reasoning that produced it.
 
 | ID | Quantity | Estimate | Basis for the estimate |
 |---|---|---|---|
-| E-1 | Measured upload throughput | ___ Mbps | Speed test result, recorded before build |
-| E-2 | Data volume per VM | ___ GB | Planned VM sizing |
-| E-3 | Initial replication duration, all 3 VMs | ___ hours | E-2 x 3 / E-1, assuming sustained throughput equals advertised |
-| E-4 | Cutover window (freeze to validated) | ___ minutes | Estimate from runbook step durations |
-| E-5 | Application downtime during cutover | ___ minutes | Subset of E-4 |
-| E-6 | Defects found during validation | ___ | Judgment; no prior data |
-| E-7 | Rollback duration | ___ minutes | Estimate from rollback plan step durations |
-| E-8 | Total AWS cost, pathfinder wave | $ ___ | AWS Pricing Calculator, assumptions recorded separately |
-| E-9 | Effort, Wave 0 landing zone | ___ hours | Three-point estimate, see schedule baseline |
-| E-10 | Effort, Wave 1 pathfinder | ___ hours | Three-point estimate, see schedule baseline |
+| E-1 | Measured upload throughput | 37.27 Mbps | Ookla speedtest.net, Windows laptop, 2026-10-29, lower of two runs (37.27 and 39.13). Evidence: `evidence/week-01/E1-bandwidth-measurement.md` |
+| E-2 | Data volume per VM | db01 12.09 GB (12,088,487,936 B); app01 11.30 GB (11,299,930,112 B); lic01 2.96 GB (2,955,026,432 B); total 26.34 GB (26,343,444,480 B) | Measured used bytes (`df -B1 --output=used /`) after the attempt 2 build, 2026-11-04, before any replication. The plan committed on 2026-10-29 was 8 GiB per VM (24 GiB total) |
+| E-3 | Initial replication duration, all 3 VMs | 1.5 hours | Value committed on 2026-10-29 (3 x 8 GiB / 37.27 Mbps = 1.54 h), kept unchanged for P-1. Recomputed from the measured E-2 total: 26,343,444,480 B x 8 / 37.27 Mbps = 5,655 s (94.2 min, 1.57 h). Reported alongside, not substituted. No allowance for overhead |
+| E-4 | Cutover window (freeze to validated) | 68 minutes | Sum of runbook step estimates, Worksheet A. Drafted with AI assistance, reviewed and adopted by the author. Instance launch and network-fix durations are guesses, no prior data |
+| E-5 | Application downtime during cutover | 63 minutes | E-4 minus the 5-minute pre-check done before the source app is stopped. Clock starts when the source app stops and ends when AWS validation passes |
+| E-6 | Defects found during validation | 4 | Judgment; no prior data. Three expected: the undocumented licence dependency (seeded), the audit_log table without a primary key (seeded), the hosts-file entries that point at old addresses. Plus one allowed for something unplanned. Drafted with AI assistance, reviewed and adopted by the author |
+| E-7 | Rollback duration | 20 minutes | Sum of rollback plan step estimates, Worksheet B. Drafted with AI assistance, reviewed and adopted by the author. Assumes the source VMs were stopped but not changed |
+| E-8 | Total AWS cost, pathfinder wave | $20 | Author's estimate. Sits between the $15 and $30 budget alerts. Pricing Calculator assumptions recorded separately in the cost baseline |
+| E-9 | Effort, Wave 0 landing zone | 50.3 hours | Three-point (PERT) estimate for WBS 3.0 Landing Zone, committed in `pm-baselines/wbs.md` on 2026-10-29 before Wave 0 execution was logged complete |
+| E-10 | Effort, Wave 1 pathfinder | 83.8 hours | Three-point (PERT) estimate for WBS 4.0 Pathfinder Migration, committed in `pm-baselines/wbs.md` on 2026-10-29: optimistic 36, most likely 74, pessimistic 170. Includes 29.3 hours of elapsed initial synchronization (WBS 4.2.2); attended effort is 54.5 hours. Scope is the full WBS 4.0, including the source build |
 
 **Fill every blank before committing this file.** An estimate written after the fact is
 worthless for the comparison this project is built on.
 
 Where an estimate is close to a guess, say so in the basis column. "Judgment, no prior
 data" is an honest entry and is itself a finding when the measurement comes in.
+
+---
+
+## Estimate worksheets
+
+Estimates are written for a cutover that goes to plan. The failed cutover in the
+exercise is a test of the plan, so its expected failure is not built into these numbers.
+
+**Worksheet A, cutover (E-4, E-5)**
+
+| Step | Minutes | Basis |
+|---|---|---|
+| Pre-cutover checklist and freeze announcement | 5 | Judgment |
+| Stop the source app and writes | 3 | Judgment |
+| Confirm replication lag is zero in the MGN console | 5 | Judgment |
+| Launch the three cutover instances (in parallel) and wait for conversion and boot | 25 | Guess, to be checked against the MGN launch log |
+| EC2 status checks pass | 5 | Judgment |
+| Fix network settings (hosts file now points at old addresses, security groups) | 15 | Guess |
+| Validation: app returns 200, 200000 patients, licence reachable | 10 | Judgment |
+| **Total (E-4)** | **68** | |
+| **Downtime (E-5): all steps after the pre-check** | **63** | |
+
+**Worksheet B, rollback (E-7)**
+
+| Step | Minutes | Basis |
+|---|---|---|
+| Decide to roll back and notify | 5 | Judgment |
+| Stop or isolate the AWS instances | 5 | Judgment |
+| Restart the source services (licsvc, MySQL, app) | 5 | Judgment |
+| Confirm the source app answers correctly | 5 | Judgment |
+| **Total (E-7)** | **20** | |
 
 ---
 
@@ -163,6 +195,18 @@ Stated here so the limitation is on record before any result exists:
 Confirming these predictions does not establish that pathfinder measurement improves
 estimates generally. It establishes what happened in this environment, under these
 constraints, for this application.
+
+---
+
+## Revision note, 2026-11-04
+
+E-2 was planned as 8 GiB per VM and is now recorded from measured used bytes after the
+source environment was rebuilt. E-3 keeps its originally committed value. The first build used
+Ubuntu 26.10, which AWS MGN does not support, so it was discarded before any
+replication (attempt 1, kept as superseded evidence). The rebuild on Ubuntu Server
+24.04.3 LTS gave the E-2 figures above. No replication has started. E-4 to E-8 were
+filled on 2026-11-04 with AI assistance and adopted by the author, before any
+replication. E-9 and E-10 are copied from the WBS committed on 2026-10-29.
 
 ---
 
