@@ -102,3 +102,14 @@ EVM reporting begins once the cost baseline is committed in Phase 1.
 - Rebuild the landing zone, initialise MGN, install the agent on all three VMs.
 - Start replication and record the start time.
 
+
+### 2026-11-06 (Friday), entries so far
+
+- 09:26 CST: Cost baseline (`pm-baselines/cost-baseline.md`, commit c78b236) confirmed pushed to GitHub before replication. Local and remote branches match.
+- 09:42 CST: The four rates the cost baseline marked as unverified (t3.small, gp3, EBS snapshot Standard, public IPv4) were checked on the AWS pricing pages for us-east-1. All four match the committed baseline. Screenshots are in `evidence/week-02/attempt-2/cost-baseline-pricing-check-*.png`.
+- 10:17 to 10:19 CST: MGN agent installer downloaded on all three VMs. About 150 to 300 KB/s per VM with three downloading at once; the agent install that followed took about 30 minutes on db01 and app01 (started about 10:23, both registered by about 10:56).
+- 10:56 to 10:57 CST: Console replication start for app01 (10:56) and db01 (10:57). Both share replication server i-057254419e232394a.
+- About 12:47 CST: Initial sync of db01 and app01 ended, read from CloudWatch NetworkIn (traffic stops). About 111 minutes, 25.5 GB received at an average of 30.6 Mbps. Analysis: `evidence/week-02/attempt-2/e3-initial-sync-analysis.md`. E-3 is not changed; lic01 is still to finish.
+- 14:57 CST: lic01 raised from 1 GB to 2 GB RAM after the installer was killed for lack of memory (RAID I-08).
+- 14:47 to 15:21 CST: Three failed installs on lic01 for credential reasons (RAID I-09). lic01 later registered and was at 12% of its initial sync at 16:11 CST, about 30 minutes left (console estimate).
+- 16:09 CST: Windows event log shows no sleep, restart, shutdown or power loss on the laptop since 08:00 (PowerShell Get-WinEvent returned no events). No host outage is recorded.
