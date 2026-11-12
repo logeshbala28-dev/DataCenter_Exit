@@ -113,3 +113,38 @@ EVM reporting begins once the cost baseline is committed in Phase 1.
 - 14:57 CST: lic01 raised from 1 GB to 2 GB RAM after the installer was killed for lack of memory (RAID I-08).
 - 14:47 to 15:21 CST: Three failed installs on lic01 for credential reasons (RAID I-09). lic01 later registered and was at 12% of its initial sync at 16:11 CST, about 30 minutes left (console estimate).
 - 16:09 CST: Windows event log shows no sleep, restart, shutdown or power loss on the laptop since 08:00 (PowerShell Get-WinEvent returned no events). No host outage is recorded.
+
+
+### 2026-11-11 (Wednesday)
+
+- 15:59 to 16:10 CST: Replication check before configuring launch. All three servers show Ready for testing and Healthy in MGN, with last snapshots 8, 8 and 1 minutes old. Replication kept running from 2026-11-06 to 2026-11-11 without intervention. Public IP still 73.247.253.152, matching `source_public_ip` and `admin_ip`, so the replication security group still admits the source.
+- 16:22 to 17:02 CST: Launch settings set per server. MGN defaults were instance type right-sizing On (c5.large), blank subnet, blank security group, Public IP No. Changes: right-sizing Off, t3.small, subnet `pathfinder-public-us-east-1a` (`subnet-00cc79f2e48b9b0b8`), delete on termination Yes, Public IP No except app01.
+
+| Server | Template | Default version | Security group | Public IP |
+|---|---|---|---|---|
+| app01 | lt-024820838947f5097 | 3 | pathfinder-app (sg-09cec7994b259cc3a) | Yes |
+| db01 | lt-0679b539dcd6bfface | 4 | pathfinder-db (sg-021169865f79e1bae) | No |
+| lic01 | lt-0686d7f97acedab13 | set in console | pathfinder-dependency (sg-04ddfaa3eb160b50d) | No |
+
+- Decision: t3.small chosen over MGN's recommended c5.large (about 4 times the hourly price) to stay inside the cost baseline. Source VMs have 2 vCPU and 1.87 GiB RAM; t3.small has 2 vCPU and 2 GiB. If validation shows slow response, record it as a cost versus sizing finding.
+- Note: new template versions are not used by MGN until set as the default version in the EC2 console. Version 3 for app01 and version 4 for db01 were created, then promoted. Right-sizing is a separate setting on the MGN launch settings page.
+- Evidence: `evidence/week-03/launch-settings-{app01,db01,lic01}.png`, `mgn-health-before-test-1611cst.png`.
+
+- 17:04 to 17:39 CST: First test launch, in order lic01, db01, app01 (licence service before the application, RAID I-07). All three jobs completed without errors.
+
+| Server | Job | Start | Snapshot done | Conversion done | Instance launched | Duration |
+|---|---|---|---|---|---|---|
+| lic01 | mngjob-326bde564dc220c69 | 17:04 | 17:05 | 17:09 | 17:15 (i-0f20db1ee571ce899) | 11 min |
+| db01 | mngjob-35832f6193e61cb82 | 17:08 | 17:09 | 17:13 | 17:19 (i-0fa7994976ab19a56) | 11 min |
+| app01 | mngjob-31d3f6e17bd9b37ae | 17:29 | 17:30 | 17:34 | 17:39 (i-0bcf77ca72556f9ea) | 10 min |
+
+- Each job used a temporary conversion server that MGN removes itself. Cost to be reconciled in the bill check.
+- Validation checklist (`runbooks/validation-checklist.md`) and defect log (`logs/defect-log.md`) written at 17:30, before any instance was opened.
+
+- 17:50 to 18:35 CST: Test instance validation (`runbooks/validation-checklist.md`, `logs/defect-log.md`). All three instances Running with 3/3 checks at 17:50. First request to app01 at 17:52 returned HTTP 500. Cause: stale old addresses in `/etc/hosts` (D-01), which made the licence check time out (D-02). Fix about 18:23 (31 min from first symptom, including a detour caused by a wrong example address I gave). After the fix the app returned `{"patients":200000,"status":"ok"}`. Database check at 18:35: row counts 200000 / 400000 / 300000 match the source, `audit_log` has no primary key (D-03). Defects found 3 against 4 estimated (E-6). Source VMs untouched and running throughout.
+- Observation: the application database password is in plain text in the application code and in the build runbook. Not a migration defect, noted for the lessons section.
+
+**Next**
+- Commit today's logs and evidence.
+- Draft cutover and rollback runbooks and go-live criteria before any cutover step.
+- Decide what to do with the three test instances overnight (about $0.083 an hour for the four running instances).
