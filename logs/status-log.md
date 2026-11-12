@@ -142,6 +142,7 @@ EVM reporting begins once the cost baseline is committed in Phase 1.
 - Validation checklist (`runbooks/validation-checklist.md`) and defect log (`logs/defect-log.md`) written at 17:30, before any instance was opened.
 
 - 17:50 to 18:35 CST: Test instance validation (`runbooks/validation-checklist.md`, `logs/defect-log.md`). All three instances Running with 3/3 checks at 17:50. First request to app01 at 17:52 returned HTTP 500. Cause: stale old addresses in `/etc/hosts` (D-01), which made the licence check time out (D-02). Fix about 18:23 (31 min from first symptom, including a detour caused by a wrong example address I gave). After the fix the app returned `{"patients":200000,"status":"ok"}`. Database check at 18:35: row counts 200000 / 400000 / 300000 match the source, `audit_log` has no primary key (D-03). Defects found 3 against 4 estimated (E-6). Source VMs untouched and running throughout.
+- 18:39 to 18:42 CST: Budget alerts created (`pathfinder-monthly-15` and `pathfinder-monthly-30`). They were planned in the cost baseline but had not been configured; found when the Billing home page showed no budget. Month-to-date spend $3.80, forecast $7.15 (before today's test instances, which have not posted yet).
 - Observation: the application database password is in plain text in the application code and in the build runbook. Not a migration defect, noted for the lessons section.
 
 **Next**
