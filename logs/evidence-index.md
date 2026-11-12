@@ -11,6 +11,13 @@ Filed every Friday. Captured at the moment of the event, never reconstructed.
 | 2026-11-04 | Dependency test, licence service stopped and restored | Screenshots | evidence/week-02/attempt-2/ (17, 18, 20) | App returns 500 with lic01 stopped, ok when restored. Server time in GMT |
 | 2026-11-04 | E-2 measured (26,343,444,480 bytes used across three VMs) | Screenshots | evidence/week-02/attempt-2/ (12, 19) | db01 12,088,487,936, app01 11,299,930,112, lic01 2,955,026,432 |
 | 2026-11-04 | Pre-registration E-1 to E-10 committed before replication | Commit | Repository history, commit 39d44b4 | Pushed 12:58 local time. GitHub timestamp screenshot still to add |
+| 2026-11-11 | Replication health before launch | Screenshot | evidence/week-03/mgn-health-before-test-1611cst.png | All three servers Ready for testing and Healthy, snapshots under 10 minutes old, five days after initial sync |
+| 2026-11-11 | Launch settings per server | Screenshots | evidence/week-03/launch-settings-{app01,db01,lic01}.png | t3.small, pathfinder public subnet, security group per tier, Public IP only on app01, right-sizing off |
+| 2026-11-11 | Test launch jobs | Screenshots | evidence/week-03/test-launch-{lic01,db01,app01}-*.png | Job logs from start to "Job ended", 10 to 11 minutes each (17:04, 17:08, 17:29 starts) |
+| 2026-11-11 | Test instances running | Screenshot | evidence/week-03/test-instances-running-1750cst.png | Replication server plus three test instances, 3/3 status checks |
+| 2026-11-11 | Validation, defects D-01 and D-02 | Screenshots | evidence/week-03/validation-app01-*.png, lic01-instance-summary-1800cst.png | HTTP 500 at first load, stale hosts file, licence timeout in the journal, licence service reachable at the new address, page returns 200000 patients after the fix |
+| 2026-11-11 | Validation, defect D-03 | Screenshot | evidence/week-03/validation-db01-counts-and-audit-log-1835cst.png | Row counts 200000 / 400000 / 300000, audit_log has no primary key |
+| 2026-11-11 | Cost and budget alerts | Screenshots | evidence/week-03/billing-home-1839cst.png, budget-alerts-created-1842cst.png | Month-to-date $3.80, forecast $7.15; budgets of $15 and $30 created |
 
 ## Evidence strength, strongest first
 
