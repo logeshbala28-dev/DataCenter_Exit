@@ -18,6 +18,9 @@ Filed every Friday. Captured at the moment of the event, never reconstructed.
 | 2026-11-11 | Validation, defects D-01 and D-02 | Screenshots | evidence/week-03/validation-app01-*.png, lic01-instance-summary-1800cst.png | HTTP 500 at first load, stale hosts file, licence timeout in the journal, licence service reachable at the new address, page returns 200000 patients after the fix |
 | 2026-11-11 | Validation, defect D-03 | Screenshot | evidence/week-03/validation-db01-counts-and-audit-log-1835cst.png | Row counts 200000 / 400000 / 300000, audit_log has no primary key |
 | 2026-11-11 | Cost and budget alerts | Screenshots | evidence/week-03/billing-home-1839cst.png, budget-alerts-created-1842cst.png | Month-to-date $3.80, forecast $7.15; budgets of $15 and $30 created |
+| 2026-11-16 | DR Phase A: images, cross-region copy, security groups | Screenshots | evidence/week-04/dr1-A2-*.png, dr1-A3-*.png, dr1-A4-*.png | Two failed copies (State reason shown), AMI creation times 11:07 to 11:12, copies Available 13:06 to 13:09, groups created by 13:21, outbound rule corrected 13:31. Account number, name and addresses blanked |
+| 2026-11-16 | DR Phase B: launch in us-west-2 and recovery | Screenshots | evidence/week-04/dr1-B1-*.png, dr1-B2-*.png, dr1-B3*-*.png | DISASTER DECLARED 13:35:22, three Running 13:51, hosts fixed about 13:59, page 14:00, licence 14:01, row counts 14:03:53. Log: logs/status-log.md |
+| 2026-11-16 | DR Phase C: destroy and region check | Screenshots | evidence/week-04/dr1-C1-*.png, dr1-C2-*.png, dr1-C3-*.png | us-west-2 empty at 14:17; us-east-1 shows only the three cutover instances and one MGN snapshot from 6 Nov |
 
 ## Evidence strength, strongest first
 

@@ -217,3 +217,42 @@ Attempt one used Option A (DEC-01): lic01 left out of the cutover launch. DP-1 l
 | 9 Finalize cutover (all three servers) | n/a | 10:35 (as reported; screenshot of "Cutover complete" to follow) | | DP-1 go at about 10:30. Replication servers scheduled for deletion within about 90 minutes. Cutover instances kept for the DR exercise |
 
 **Observation, SSH to db01:** from app01, port 22 to db01 timed out and port 3306 connected. `ufw` on the source db01 is inactive. The likely cause is the `pathfinder-db` security group allowing only the database port. To be confirmed in the security group's inbound rules. Decide later whether to keep it (least privilege) or add a controlled access path for the wave plan.
+
+## DR exercise, 2026-11-16
+
+**Phase A (preparation, not in the RTO):** images created in us-east-1 at 11:07 (app01), 11:11 (db01), 11:12 (lic01). Cross-region copies to us-west-2 available at 13:08 (app01), 13:09 (db01), 13:06 (lic01) after two failed attempts (encryption not ticked; KMS key box held a us-east-1 key). Security groups dr-app, dr-db, dr-dependency created in us-west-2 by about 13:21. The dr-dependency outbound rule was first saved with the wrong destination and corrected at about 13:31 before the declaration.
+
+**DISASTER DECLARED at 13:35:22 CST (clock start, B0).** The three us-east-1 instances are treated as lost.
+
+### Phase B, timed recovery (16 Nov, CST; times from screenshots and `date` output)
+
+| Step | Time | Result |
+|---|---|---|
+| B0 DISASTER DECLARED | 13:35:22 | Written to this log. RPO at declaration: app01 image 148 min old, db01 144, lic01 143 |
+| B1 launch lic01 | about 13:40 | First attempt had Auto-assign public IP on Enable; cancelled and relaunched with Disable |
+| B1 launch db01 | about 13:44 | Settings correct (dr-db, no public IP) |
+| B1 launch app01 | about 13:50 | Form first showed public IP Disable; changed to Enable before launch |
+| B1 end: three Running | 13:51 | lic01 and db01 3/3 checks; app01 Initializing. app01 public address recorded in the cloud console, not in this repository |
+| B2 hosts file fixed | about 13:59:45 | Stale 10.20.0.145 (db01) and 10.20.0.105 (lic01) lines replaced by the new us-west-2 private addresses (D-01 repeats from the image). Backup in `/etc/hosts.bak` |
+| B3a application page | 14:00 | `{"patients":200000,"status":"ok"}` |
+| B3b licence check | 14:01:02 | `valid:true`, `exit=0` |
+| B3c row counts | 14:03:53 | 200000 / 400000 / 300000. `mysql` client was not present on the recovered app01 (not found at 14:01:24); installed with apt, about 2 min |
+| **B4 RECOVERED** | **14:03:53** | All three recovery conditions true |
+
+**Phase B result:** 13:35:22 to 14:03:53 = **28 min 31 s** against the 60 min DR estimate and the 4 h objective (O-5). P-3 (recovery exceeds the 4 h objective) is **not supported**: the recovery took 28.5 min under controlled conditions. Limits: no writes during the exercise (RPO 148 min is the age of the oldest image), crash-consistent images, three servers and one application only.
+
+**Findings:** (1) Cross-region copy failed twice at Phase A (encryption not ticked; KMS key field held a us-east-1 key); the cause was found from the AMI State reason. (2) Security groups do not copy across regions and the dr-dependency outbound rule was first saved with the wrong destination. (3) Public IP setting was wrong on two of three launches in B1 (caught before launch each time). (4) The stale hosts file (D-01) came back in the recovered image. (5) The database client was not on the recovered app01. (6) Phase A took longer than planned because of finding 1 and 2; it is not in the RTO.
+
+### Phase C, destroy (16 Nov, CST)
+
+| Step | Time | Result |
+|---|---|---|
+| C1 terminate the three us-west-2 instances | 14:07 | dr-app01, dr-lic01, dr-db01 show Terminated |
+| C1 deregister the three us-west-2 AMIs, with "delete associated snapshots" ticked | 14:08 | Three AMIs deregistered; Snapshots, Owned by me, was empty at 14:09 (region Oregon, refreshed) |
+| C1 delete the three security groups | about 14:17 | dr-db and dr-dependency deleted first; dr-app was refused until the two groups that referenced it were gone, then deleted. Only `default` remains |
+| C2 deregister the three us-east-1 `dr-*-v1` AMIs, snapshots deleted | 14:12 | One snapshot remains in us-east-1: an "AWS Application Migration Service" snapshot of 1 GiB from 6 Nov. It is not part of the DR exercise; it goes on the main teardown list |
+| C3 region check | 14:14 to 14:15 | us-east-1: only the three cutover instances (meridian-app01, meridian-db01, meridian-lic01), all Running 3/3. us-west-2: three Terminated, nothing running |
+
+The default VPC and default security group in us-west-2 were left in place (free, created by AWS, not part of the exercise).
+
+**DR evidence:** 31 redacted screenshots in `evidence/week-04/` named `dr1-<step>-<time>cst.png`. The account number, name, home address and public addresses were blanked before they were saved here.
