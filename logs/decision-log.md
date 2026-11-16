@@ -18,3 +18,11 @@ A decision is recorded **before** implementation, not after.
 
 Both decisions were recorded before step 1 of attempt one started. The pre-window step
 (Mark as Ready for cutover, terminate the test instances) ran earlier, 19:29 to 19:35 CST.
+
+## Disaster recovery decisions (before the exercise)
+
+| ID | Date and time | Decision | Why |
+|---|---|---|---|
+| DEC-03 | 2026-11-16 10:55 CST | Recovery region **us-west-2** | Standard second region for a US east-coast workload; the build checklist already checks it |
+| DEC-04 | 2026-11-16 10:55 CST | Recover **all three** servers | The app calls the licence service on every request. Cost of the third server is about $0.10 to $0.15 |
+| DEC-05 | 2026-11-16 10:55 CST | Clock from "disaster declared" to the app, licence check and row counts all passing in us-west-2 (Phase B). Phase A (preparation) is timed and reported but P-3 is judged on Phase B | Defined before the exercise so P-3 is not scored on a definition chosen afterwards. Chosen by the author on the recommendation of the AI assistant |

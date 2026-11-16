@@ -192,3 +192,28 @@ Attempt one used Option A (DEC-01): lic01 left out of the cutover launch. DP-1 l
 **P-4: confirmed.** At least one step is wrong (RB-G1) and at least one is missing (RB-G2, RB-G3).
 
 **RB-G5 check (09:42):** EC2 Instances (filter: running) shows only the MGN replication server (`t3.small`). Both cutover instances are gone, so the revert stopped their EC2 charges. Billing itself is checked later in the cost log.
+
+### 2026-11-16 (Monday): cutover attempt two (cutover-runbook-v2.md, committed bd474dc at 09:43 before the window)
+
+| Step | Plan (min) | Time (CST) | Actual | Note |
+|---|---|---|---|---|
+| 1 Pre-check, T0 | 5 | between 09:43 and 09:48 | not recorded | T0 was not written down. Treated as approximate |
+| 2 Stop source services | 3 | **09:48:17 to 09:48:18** (VM `date` 15:48:17/18 UTC) | under 1 | **Downtime clock starts 09:48:18.** db01 and lic01 stopped one second before app01. Source page: 502 |
+| 3 Lag and backlog check | 5 | 09:49 | about 1 | Launch job took its own snapshots |
+| 4 Launch cutover instances, all three servers | 25 | 09:49 to 10:01 (job mgnjob-33aef7f72a99c5cec ended 10:02) | 12 | app01, db01 and lic01 all Launched |
+| 5 EC2 status checks | 5 | 10:06 | about 4 | Three instances 3/3 passed. app01 public IP 44.201.47.135; private IPs db01 10.20.0.145, lic01 10.20.0.105, app01 10.20.0.88 |
+| 6 Hosts file | 15 | 10:06 to 10:10 | about 4 | Both lines fixed (db01 and lic01). `date` 16:10:04 UTC |
+| 7a Application | | first load about 10:12 (recollection), screenshot with clock 10:18 | | `{"patients":200000,"status":"ok"}`. **Downtime clock stops at 10:18 at the latest** |
+| 7b Licence | | 10:11:39 | | `{"org":"Meridian Regional Health Partners","seats":1800,"valid":true}` |
+| 7c Row counts | | 10:28:35 | | patients 200000, appointments 400000, audit_log 300000 (from app01 over port 3306, `date` 16:28:35 UTC) |
+
+**E-5 (downtime):** estimate 63 min. Measured **about 30 min** (09:48:18 to 10:18). Possibly about 24 min if the first pass was at 10:12 as recollected. The evidenced value is 10:18.
+**E-4 (window):** estimate 68 min. T0 not recorded (between 09:43 and 09:48), so about 31 to 35 min up to 10:18, about 41 to 45 min including the row-count check at 10:28.
+
+**Observations:** (1) SSH from app01 to db01 (port 22) timed out; port 3306 worked. Row counts were read through the database port. (2) The first PuTTY session to app01 timed out while idle and had to be reopened. (3) The screenshot with the clock for 7a was taken a second time, because the first pass was not captured with the clock.
+
+**DP-1 decision: GO at about 10:30.** GL-1 to GL-6 all met. Next: Finalize cutover (step 9).
+
+| 9 Finalize cutover (all three servers) | n/a | 10:35 (as reported; screenshot of "Cutover complete" to follow) | | DP-1 go at about 10:30. Replication servers scheduled for deletion within about 90 minutes. Cutover instances kept for the DR exercise |
+
+**Observation, SSH to db01:** from app01, port 22 to db01 timed out and port 3306 connected. `ufw` on the source db01 is inactive. The likely cause is the `pathfinder-db` security group allowing only the database port. To be confirmed in the security group's inbound rules. Decide later whether to keep it (least privilege) or add a controlled access path for the wave plan.
