@@ -149,3 +149,46 @@ EVM reporting begins once the cost baseline is committed in Phase 1.
 - Commit today's logs and evidence.
 - Draft cutover and rollback runbooks and go-live criteria before any cutover step.
 - Decide what to do with the three test instances overnight (about $0.083 an hour for the four running instances).
+
+### 2026-11-11 (Wednesday) evening and 2026-11-16 (Monday): cutover attempt one
+
+Attempt one used Option A (DEC-01): lic01 left out of the cutover launch. DP-1 limit 75 minutes (DEC-02).
+
+| Step | Time (CST) | Note |
+|---|---|---|
+| Pre-window: Mark as Ready for cutover | 11 Nov 19:29 to 19:35 | Three terminate jobs, run separately (app01 19:29, db01 19:30, lic01 19:34) |
+| 1 Pre-check, T0 | 11 Nov 19:46 | Deviation 1: last snapshots were app01 16, db01 37, lic01 12 minutes old. Lag and backlog none, all Healthy. Idle servers are not snapshotted until data changes |
+| 2 Stop source services | about 20:07 (approximate, from "one or two minutes" before a 20:08 screenshot) | app01 stopped first. 502 Bad Gateway at 20:08. `licsvc.service` confirmed as the lic01 unit name |
+| 3 Snapshot after stop | 20:14 | Deviation 2: only db01 had a snapshot after the stop (about 20:08). MGN took fresh snapshots of app01 and db01 when Launch was clicked (20:14 to 20:15) |
+| 4 Launch cutover instances (app01, db01 only) | 11 Nov 20:14 to 20:25 | 11 minutes against 25 planned |
+| Pause | 11 Nov about 20:26 to 16 Nov 09:07 | Attempt paused at the start of step 5. DP-1 limit (21:01) passed during the pause. E-4 and E-5 for attempt one are therefore not usable measurements |
+| 5 EC2 status checks | observed 16 Nov 09:07 | Both instances 3/3 passed. Time of passing not captured |
+| 6 Hosts file | 16 Nov 09:13 | app01 hosts had stale `192.168.161.11 meridian-db01`. Changed to `10.20.0.188`. Backup at `/etc/hosts.bak` |
+| 7 Validation | 16 Nov 09:13 to 09:16 | `GET /` returned 500. Journal: `ConnectTimeout ... host='meridian-lic01', port=8080 ... /license`. curl from app01 to the licence address: exit 28 (timeout). This is the planned failure |
+| DP-1 decision | 16 Nov about 09:17 | Roll back. Triggers: RB-1 (application does not return the expected response after step 6) and RB-3 (limit passed). Rollback clock starts here |
+
+#### Rollback of attempt one, 2026-11-16 (rollback-plan.md v1, executed unchanged)
+
+| Step | Plan (min) | Start | End | Actual | Note |
+|---|---|---|---|---|---|
+| 1 Decide and notify | 5 | 09:17 | 09:17 | under 1 | Decision logged. No action taken until 09:33 |
+| (gap between decision and first action) | none | 09:17 | 09:33 | 16 | Not in the plan |
+| 2 Remove AWS instances (revert to Ready for cutover, app01 and db01 only) | 5 | 09:33 | 09:33 | under 1 | Terminate job mgnjob-34e30289e318dd5f4 completed within the minute. Both instances Terminated |
+| 3 Restart source services (lic01, db01, app01) | 5 | about 09:34 | about 09:38 | about 4 | All three active. Exact start and end times were not written down |
+| 4 Source application confirmed | 5 | | 09:39 | about 1 | `{"patients":200000,"status":"ok"}` on first load |
+| Extra check: MGN | n/a | | 09:39 | n/a | All three Ready for cutover and Healthy. No rescan seen. app01 took a new snapshot (2 min old); db01 25 min, lic01 37 min |
+
+**E-7 (rollback duration):** estimate 20 min. Measured **about 22 min from decision to done**, of which about **6 min was hands-on work** (09:33 to 09:39) and **16 min was the gap** between deciding and acting.
+
+**Answers to the plan's known unknowns:** MGN returned both servers to Ready for cutover with replication Healthy and no rescan. `licsvc.service` is the real unit name on lic01. The app answered on first load after the restart (time not measured). Whether billing stopped after the revert was not checked yet.
+
+**Gaps found (P-4):**
+1. **RB-G1, wrong step.** Step 2 says tick all three servers. In attempt one only app01 and db01 had been launched, so the instruction does not match the state. The plan assumes every server was launched.
+2. **RB-G2, missing step.** Nothing says what to do between the decision and the first action, and nothing owns it. 16 minutes passed.
+3. **RB-G3, missing provision.** The plan has no rule for a cutover window that is paused or abandoned. The source services stayed stopped for about 5 days (11 Nov 20:07 to 16 Nov 09:38) before the rollback, so the source application was down far beyond the planned 63 minutes.
+4. **RB-G4, estimate.** Hands-on steps 2 to 4 took about 6 minutes against 15 planned. The plan overestimates the work and underestimates the decision delay.
+5. **RB-G5, missing check.** The plan does not say how to confirm that billing stopped after the revert (EC2 instances terminated and no running cutover instances). Not yet verified.
+
+**P-4: confirmed.** At least one step is wrong (RB-G1) and at least one is missing (RB-G2, RB-G3).
+
+**RB-G5 check (09:42):** EC2 Instances (filter: running) shows only the MGN replication server (`t3.small`). Both cutover instances are gone, so the revert stopped their EC2 charges. Billing itself is checked later in the cost log.
