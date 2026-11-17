@@ -21,6 +21,8 @@ Filed every Friday. Captured at the moment of the event, never reconstructed.
 | 2026-11-16 | DR Phase A: images, cross-region copy, security groups | Screenshots | evidence/week-04/dr1-A2-*.png, dr1-A3-*.png, dr1-A4-*.png | Two failed copies (State reason shown), AMI creation times 11:07 to 11:12, copies Available 13:06 to 13:09, groups created by 13:21, outbound rule corrected 13:31. Account number, name and addresses blanked |
 | 2026-11-16 | DR Phase B: launch in us-west-2 and recovery | Screenshots | evidence/week-04/dr1-B1-*.png, dr1-B2-*.png, dr1-B3*-*.png | DISASTER DECLARED 13:35:22, three Running 13:51, hosts fixed about 13:59, page 14:00, licence 14:01, row counts 14:03:53. Log: logs/status-log.md |
 | 2026-11-16 | DR Phase C: destroy and region check | Screenshots | evidence/week-04/dr1-C1-*.png, dr1-C2-*.png, dr1-C3-*.png | us-west-2 empty at 14:17; us-east-1 shows only the three cutover instances and one MGN snapshot from 6 Nov |
+| 2026-11-16 | Teardown: cutover instances terminated | Screenshot | evidence/week-04/teardown-useast1-instances-terminated-1825cst.png; cutover2-db01-sg-inbound-1817cst.png | 18:25 CST all three Terminated; db01 security group has only port 3306 (explains the SSH timeout) |
+| 2026-11-16 | Teardown region check: instances, volumes, Elastic IPs, VPCs, NAT gateways; MGN servers and launch history | Screenshots | evidence/week-04/teardown-check-*.png, teardown-mgn-source-servers-*.png, cutover-mgn-launch-history-1843cst.png, cutover2-launch-job-*.png | About 18:41 to 18:59 CST. No hourly-billed resource left; replication 0 servers |
 
 ## Evidence strength, strongest first
 
